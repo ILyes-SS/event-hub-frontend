@@ -116,7 +116,7 @@ const EventPage = async ({ params }: { params: Promise<{ id: string }> }) => {
           {event.Images && event.Images.length > 0 && (
             <div className="relative w-full h-[45vh] min-h-[350px] max-h-[600px]">
               <Image
-                src={process.env.NEXT_PUBLIC_STRAPI_API_URL + event.Images[0].url}
+                src={event.Images[0].url}
                 alt={event.Title}
                 fill
                 priority

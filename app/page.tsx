@@ -20,6 +20,7 @@ export default async function Home() {
   const { data: header } : { data: Header } = await resHeader.json()
   const { data: events } : { data: Event[] } = await resEvents.json()
 
+
   return (
     <main className="min-h-screen bg-slate-50 py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
@@ -42,7 +43,7 @@ export default async function Home() {
               {event.Images && event.Images.length > 0 ? (
                 <div className="relative w-full h-64 overflow-hidden bg-slate-200">
                   <Image
-                    src={process.env.NEXT_PUBLIC_STRAPI_API_URL + event.Images[0].url} 
+                    src={event.Images[0].url} 
                     alt={event.Title} 
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
