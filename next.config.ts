@@ -16,6 +16,11 @@ const nextConfig: NextConfig = {
         hostname: "localhost",
         port: "1339",
         pathname: "/**",
+      },      
+      {
+        protocol: "https",
+        hostname: "accessible-poem-1828f4c906.strapiapp.com",
+        pathname: "/**",
       },
     ],
     dangerouslyAllowLocalIP: true,

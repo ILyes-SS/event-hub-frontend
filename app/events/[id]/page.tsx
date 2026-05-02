@@ -39,7 +39,7 @@ function renderBlockNode(block: BlockNode | any, index: number) {
       return <p key={index} className="mb-6 text-slate-700 leading-relaxed text-lg">{block.children?.map((child: any, i: number) => renderTextNode(child, i))}</p>;
     case 'heading':
       const level = block.level || 2;
-      const Tag = `h${level}` as keyof JSX.IntrinsicElements;
+      const Tag = `h${level}` as any;
       const classes = {
         1: 'text-4xl md:text-5xl font-extrabold text-slate-900 mt-12 mb-6 tracking-tight',
         2: 'text-3xl font-bold text-slate-900 mt-10 mb-5 tracking-tight',
@@ -91,7 +91,6 @@ const EventPage = async ({ params }: { params: Promise<{ id: string }> }) => {
   const { id } = await params;
 
   const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_API_URL}/api/events/${id}?populate=*`);
-  console.log(res);
   const { data: event } : { data: Event } = await res.json();
   
   if (!event) {
