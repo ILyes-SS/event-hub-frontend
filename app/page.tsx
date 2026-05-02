@@ -1,111 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-
-type ImageFormat = {
-  ext: string;
-  url: string;
-  hash: string;
-  mime: string;
-  name: string;
-  path: string | null;
-  size: number;
-  width: number;
-  height: number;
-  sizeInBytes: number;
-};
-
-type EventImage = {
-  id: number;
-  documentId: string;
-  name: string;
-  alternativeText: string | null;
-  caption: string | null;
-  focalPoint: string | null;
-  width: number;
-  height: number;
-  formats: {
-    large?: ImageFormat;
-    small?: ImageFormat;
-    medium?: ImageFormat;
-    thumbnail?: ImageFormat;
-  };
-  hash: string;
-  ext: string;
-  mime: string;
-  size: number;
-  url: string;
-  previewUrl: string | null;
-  provider: string;
-  provider_metadata: any;
-  createdAt: string;
-  updatedAt: string;
-  publishedAt: string;
-};
-
-// A basic text node within a block
-export interface TextNode {
-  type: 'text';
-  text: string;
-  bold?: boolean;
-  italic?: boolean;
-  underline?: boolean;
-  strikethrough?: boolean;
-  code?: boolean;
-}
-
-// A block element (like a paragraph or heading)
-export interface BlockNode {
-  type: 'paragraph' | 'heading' | 'list' | 'quote' | 'image';
-  children: TextNode[]; // The actual text content inside the block
-  
-  // Specific to headings
-  level?: 1 | 2 | 3 | 4 | 5 | 6; 
-  
-  // Specific to lists
-  format?: 'ordered' | 'unordered';
-  
-  // Specific to images
-  image?: {
-    url: string;
-    alternativeText?: string;
-    caption?: string;
-    width?: number;
-    height?: number;
-  };
-}
-type Organizer = {
-  id: number;
-  documentId: string;
-  Name: string;
-  ContactEmail: string;
-  createdAt: string;
-  updatedAt: string;
-  publishedAt: string;
-};
-
-type Event = {
-  id: number;
-  documentId: string;
-  Title: string;
-  Slug: string;
-  Description: BlockNode[];
-  EventDate: string;
-  Location: string;
-  Images: EventImage[];
-  organizer: Organizer;
-  createdAt: string;
-  updatedAt: string;
-  publishedAt: Date;
-};
- 
-type Header = {
-  id: number;
-  documentId: string;
-  Title: string;
-  createdAt: string;
-  updatedAt: string;
-  publishedAt: string;
-}
+import { Header, Event} from "@/types";
 
 const formatPublishDate = (date: Date) => {
   const options: Intl.DateTimeFormatOptions = {
@@ -124,37 +19,83 @@ export default async function Home() {
 
   const { data: header } : { data: Header } = await resHeader.json()
   const { data: events } : { data: Event[] } = await resEvents.json()
-  
-  console.dir(events, { depth: null })
-  console.dir(header, { depth: null })
-  
+
   return (
-    <div>
-      {header && (
-        <h1> {header.Title} </h1>
-      )}
-      {events.map((event: Event) => (
-        <Link href={`/events/${event.Slug}`} key={event.id}>
-          <h1> {event.Title} </h1>
-          {event.Images && event.Images.length > 0 && (
-            <Image
-              key={event.id}
-              src={process.env.NEXT_PUBLIC_STRAPI_API_URL + event.Images[0].url} 
-              alt={event.Title} 
-              width={event.Images[0].formats.small?.width || event.Images[0].width}
-              height={event.Images[0].formats.small?.height || event.Images[0].height}
+    <main className="min-h-screen bg-slate-50 py-16 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        {header && (
+          <div className="text-center mb-16">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight mb-6">
+              {header.Title}
+            </h1>
+            <div className="w-24 h-1.5 bg-indigo-600 mx-auto rounded-full opacity-80"></div>
+          </div>
+        )}
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 xl:gap-10">
+          {events.map((event: Event) => (
+            <Link 
+              href={`/events/${event.documentId}`} 
+              key={event.documentId}
+              className="group flex flex-col bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-300 overflow-hidden border border-slate-100 hover:-translate-y-1.5"
+            >
+              {event.Images && event.Images.length > 0 ? (
+                <div className="relative w-full h-64 overflow-hidden bg-slate-200">
+                  <Image
+                    src={process.env.NEXT_PUBLIC_STRAPI_API_URL + event.Images[0].url} 
+                    alt={event.Title} 
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </div>
+              ) : (
+                <div className="w-full h-64 bg-slate-100 flex items-center justify-center">
+                  <span className="text-slate-400">No image available</span>
+                </div>
+              )}
               
-            />
-          )}
-            
-            <div className="text-blue-500">{event.Location}</div>
-            <div className="text-green-500">{event.EventDate}</div>
-            <div className="text-red-500">{event.organizer.Name}</div>
-            <p>{formatPublishDate(event.publishedAt)}</p>
-            
-          
-        </Link>
-      ))}
-    </div>
+              <div className="p-6 flex flex-col flex-grow">
+                <div className="flex justify-between items-start mb-4">
+                  <h2 className="text-2xl font-bold text-slate-900 line-clamp-2 group-hover:text-indigo-600 transition-colors">
+                    {event.Title}
+                  </h2>
+                </div>
+                
+                <div className="space-y-3 mt-auto pt-4 border-t border-slate-100">
+                  <div className="flex items-center text-sm text-slate-600 font-medium">
+                    <svg className="w-5 h-5 mr-3 text-indigo-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    <span className="truncate">{event.Location}</span>
+                  </div>
+                  
+                  <div className="flex items-center text-sm text-slate-600 font-medium">
+                    <svg className="w-5 h-5 mr-3 text-indigo-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    <span>{event.EventDate}</span>
+                  </div>
+                  
+                  <div className="flex items-center text-sm text-slate-600 font-medium">
+                    <svg className="w-5 h-5 mr-3 text-indigo-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                    <span className="truncate">{event.organizer.Name}</span>
+                  </div>
+                </div>
+                
+                <div className="mt-6 flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  <span className="lowercase">published at {formatPublishDate(event.publishedAt)}</span>
+                  <span className="text-indigo-600 group-hover:translate-x-1 transition-transform inline-block">View Event &rarr;</span>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+        
+        {events.length === 0 && (
+          <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-slate-100 mt-8">
+            <h3 className="text-lg font-medium text-slate-900">No events found</h3>
+            <p className="mt-2 text-slate-500">Check back later for upcoming events.</p>
+          </div>
+        )}
+      </div>
+    </main>
   );
 }
